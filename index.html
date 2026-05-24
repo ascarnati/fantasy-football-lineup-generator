@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fantasy Football Lineup Generator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="app-header">
+        <div class="title-group">
+          <span class="football-icon">🏈</span>
+          <h1>Fantasy Football Lineup Generator</h1>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <form id="lineup-form" class="lineup-form">
+          <div class="input-section">
+            <div class="input-wrapper">
+              <textarea
+                id="user-input"
+                placeholder="e.g., I have $50,000 salary cap. Need QB, RB, RB, WR, WR, TE, FLEX, DEF. Available players: Patrick Mahomes (QB, $8,000), Christian McCaffrey (RB, $9,500)..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="generate-container">
+            <button
+              type="submit"
+              id="generate-button"
+              class="generate-btn"
+              aria-label="Generate Lineup"
+            >
+              <span class="button-icon">⚡</span>
+              <span class="button-text">Generate Lineup</span>
+            </button>
+          </div>
+        </form>
+
+        <section class="output-section">
+          <div id="output-container" class="hidden">
+            <div id="output-content"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>
