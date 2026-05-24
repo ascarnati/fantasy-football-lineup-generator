@@ -7,41 +7,136 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="app-container">
+    <div class="app-shell">
       <header class="app-header">
-        <div class="title-group">
-          <span class="football-icon">🏈</span>
+        <div>
+          <p class="eyebrow">AI lineup assistant</p>
           <h1>Fantasy Football Lineup Generator</h1>
+          <p class="subtitle">
+            Build salary-aware DFS and season-long lineup ideas with clear roster logic.
+          </p>
+        </div>
+        <div class="status-pill" id="api-status" aria-live="polite">
+          <span class="status-dot"></span>
+          Checking API
         </div>
       </header>
 
-      <main class="main-content">
-        <form id="lineup-form" class="lineup-form">
-          <div class="input-section">
+      <main class="workspace">
+        <section class="tool-panel" aria-labelledby="builder-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Builder</p>
+              <h2 id="builder-title">Lineup request</h2>
+            </div>
+            <button type="button" class="ghost-btn" id="clear-button">Clear</button>
+          </div>
+
+          <div class="quick-prompts" aria-label="Prompt templates">
+            <button type="button" class="template-chip" data-template="Build a balanced DFS lineup under a $50,000 salary cap for QB, RB, RB, WR, WR, WR, TE, FLEX, and DEF. Prioritize floor, projected volume, and matchup quality.">
+              Balanced DFS
+            </button>
+            <button type="button" class="template-chip" data-template="Build a high-upside tournament lineup under a $50,000 salary cap. Include one QB stack and explain the leverage points.">
+              High-Upside DFS
+            </button>
+            <button type="button" class="template-chip" data-mode="season" data-template="Set my best weekly starting lineup from the players below. Consider matchup, floor, ceiling, injury risk, bye weeks, and game script. My roster options are: ">
+              Weekly starters
+            </button>
+            <button type="button" class="template-chip" data-template="Help me choose between my flex options. Compare ceiling, floor, injury risk, matchup, and game script. Players: ">
+              Flex decision
+            </button>
+          </div>
+
+          <form id="lineup-form" class="lineup-form">
+            <fieldset class="format-panel">
+              <legend>League format</legend>
+              <div class="format-grid">
+                <label>
+                  Scoring
+                  <select id="scoring-format">
+                    <option>PPR</option>
+                    <option>Half PPR</option>
+                    <option>Standard</option>
+                    <option>Custom</option>
+                  </select>
+                </label>
+                <label>
+                  QB
+                  <input id="qb-count" type="number" min="0" max="3" value="1" />
+                </label>
+                <label>
+                  RB
+                  <input id="rb-count" type="number" min="0" max="5" value="2" />
+                </label>
+                <label>
+                  WR
+                  <input id="wr-count" type="number" min="0" max="6" value="2" />
+                </label>
+                <label>
+                  TE
+                  <input id="te-count" type="number" min="0" max="3" value="1" />
+                </label>
+                <label>
+                  FLEX
+                  <input id="flex-count" type="number" min="0" max="4" value="1" />
+                </label>
+                <label>
+                  Defense
+                  <select id="defense-format">
+                    <option>D/ST</option>
+                    <option>None</option>
+                    <option>IDP</option>
+                  </select>
+                </label>
+                <label class="checkbox-label">
+                  <input id="kicker-included" type="checkbox" checked />
+                  Kicker
+                </label>
+              </div>
+            </fieldset>
+
+            <label for="user-input">What do you want to optimize?</label>
             <div class="input-wrapper">
               <textarea
                 id="user-input"
-                placeholder="e.g., I have $50,000 salary cap. Need QB, RB, RB, WR, WR, TE, FLEX, DEF. Available players: Patrick Mahomes (QB, $8,000), Christian McCaffrey (RB, $9,500)..."
+                maxlength="1800"
+                placeholder="Tell me your goal, player pool, and constraints. Example: Set my best weekly starters from Josh Allen, Bijan Robinson, Jahmyr Gibbs, Puka Nacua, Amon-Ra St. Brown, Sam LaPorta, Brandon Aiyuk, and Jets D/ST. Note injuries, bye weeks, must-start players, players to avoid, salary cap, or scoring quirks."
               ></textarea>
             </div>
-          </div>
+            <div class="form-footer">
+              <span id="char-count">0 / 1800</span>
+              <button
+                type="submit"
+                id="generate-button"
+                class="generate-btn"
+                aria-label="Generate lineup"
+                disabled
+              >
+                <span class="button-icon">+</span>
+                <span class="button-text">Generate Lineup</span>
+              </button>
+            </div>
+          </form>
+        </section>
 
-          <div class="generate-container">
-            <button
-              type="submit"
-              id="generate-button"
-              class="generate-btn"
-              aria-label="Generate Lineup"
-            >
-              <span class="button-icon">⚡</span>
-              <span class="button-text">Generate Lineup</span>
+        <section class="result-panel" aria-labelledby="results-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Results</p>
+              <h2 id="results-title">Recommendation</h2>
+            </div>
+            <button type="button" class="ghost-btn" id="copy-button" disabled>
+              Copy
             </button>
           </div>
-        </form>
 
-        <section class="output-section">
-          <div id="output-container" class="hidden">
-            <div id="output-content"></div>
+          <div id="output-container" class="empty-state" aria-live="polite">
+            <div id="output-content">
+              <p class="empty-title">Your lineup analysis will appear here.</p>
+              <p class="empty-copy">
+                Add a salary cap, scoring format, roster slots, must-start players, and any players you want to avoid for stronger results.
+              </p>
+            </div>
           </div>
         </section>
       </main>
