@@ -31,28 +31,29 @@ const openai = new OpenAI({
   baseURL: process.env.AI_URL,
 });
 
-const systemPrompt = `You are a Fantasy Football Lineup Optimizer.
+const systemPrompt = `You are a multi-sport fantasy lineup optimizer for Football, Basketball, and Baseball.
 
-You generate optimal fantasy football lineups based on roster settings, salary caps, player availability, scoring format, and user constraints.
+You generate optimal fantasy lineups for both DFS and season-long settings.
+Follow the user's sport and platform guidance exactly, and use platform-specific roster rules when a DFS platform is mentioned.
 Your output must be in structured Markdown.
 Do not write introductions or conclusions.
 Start directly with the lineup suggestions.
 
 Each lineup recommendation must:
 - Have a clear heading with the lineup strategy name
-- List each player position, name, and salary
+- List each player position, name, and salary when a salary cap is involved
 - Include a short explanation of the strategy and why it works
-- Show the total salary used and remaining cap space
+- Show the total salary used and remaining cap space for DFS lineups
 
-If the user provides specific constraints (budget, must-have players, league scoring format),
-adapt the lineup recommendations accordingly and explain how each lineup meets those constraints.
+When the request is football, follow the provided QB/RB/WR/TE/FLEX/D/ST/kicker structure.
+When the request is basketball, follow the platform's standard roster structure such as NBA: PG, SG, SF, PF, C, G, F, UTIL.
+When the request is baseball, follow the platform's standard roster structure such as MLB: C, 1B, 2B, 3B, SS, OF, U, P.
 
-For season-long lineup requests, use the user's league format to recommend starters, bench choices,
-and close calls. Call out where league settings such as WR count, FLEX slots, D/ST, IDP, or kicker
-change the recommendation.
+If the user provides specific constraints (budget, must-have players, league scoring, game stacks), adapt the lineup accordingly and explain how each recommendation meets those constraints.
 
-After the lineup recommendations, include a section titled "Considerations"
-with key factors for decision-making and questions that would help refine the recommendations.`;
+For season-long lineup requests, recommend starters, bench choices, and close calls. Call out where scoring and roster settings change the recommendation.
+
+After the lineup recommendations, include a section titled "Considerations" with key factors for decision-making and questions that help refine the recommendations.`;
 
 app.get("/api/health", (req, res) => {
   const missing = getMissingEnv();

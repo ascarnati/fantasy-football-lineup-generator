@@ -11,16 +11,19 @@ const clearButton = document.getElementById("clear-button");
 const copyButton = document.getElementById("copy-button");
 const charCount = document.getElementById("char-count");
 const templateButtons = document.querySelectorAll(".template-chip");
-const scoringFormat = document.getElementById("scoring-format");
-const qbCount = document.getElementById("qb-count");
-const rbCount = document.getElementById("rb-count");
-const wrCount = document.getElementById("wr-count");
-const teCount = document.getElementById("te-count");
-const flexCount = document.getElementById("flex-count");
-const defenseFormat = document.getElementById("defense-format");
-const kickerIncluded = document.getElementById("kicker-included");
 
 let lastLineupText = "";
+
+const sportPlaceholders = {
+  football:
+    "Tell me your goal, player pool, and constraints. Example: Set my best fantasy NFL lineup with Josh Allen, Christian McCaffrey, and Justin Jefferson under $50,000. Include the platform you are drafting on, note injuries, bye weeks, must-start players, and suspicious price changes.",
+  basketball:
+    "Tell me your goal, player pool, and constraints. Example: Set my best fantasy NBA lineup with Luka Dončić, Jayson Tatum, and Nikola Jokic under $60,000. Include the platform you are drafting on, note injuries, stacks, matchup pace, and players to avoid.",
+  baseball:
+    "Tell me your goal, player pool, and constraints. Example: Set my best fantasy MLB lineup with Mike Trout, Aaron Judge, and a high-leverage pitcher under $35,000. Include the platform you are drafting on, note weather, handedness, lineup protection, and stacking preference.",
+  default:
+    "Tell me your goal, player pool, and constraints. Include sport, platform, roster slots, salary cap, injuries, and players to avoid.",
+};
 
 function start() {
   userInput.addEventListener("input", syncInputState);
@@ -30,17 +33,15 @@ function start() {
 
   templateButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      userInput.value = button.dataset.template;
-      if (button.dataset.mode === "season") {
-        scoringFormat.value = "PPR";
-        defenseFormat.value = "D/ST";
-        kickerIncluded.checked = true;
-      }
+      userInput.value = button.dataset.template || "";
+      const sport = button.dataset.sport;
+      userInput.placeholder = sportPlaceholders[sport] || sportPlaceholders.default;
       userInput.focus();
       syncInputState();
     });
   });
 
+  userInput.placeholder = sportPlaceholders.default;
   syncInputState();
   checkApiHealth();
 }
@@ -58,35 +59,20 @@ function clearRequest() {
   userInput.value = "";
   lastLineupText = "";
   copyButton.disabled = true;
-  resetLeagueFormat();
+  userInput.placeholder = sportPlaceholders.default;
   syncInputState();
   renderEmptyState();
   userInput.focus();
 }
 
-function resetLeagueFormat() {
-  scoringFormat.value = "PPR";
-  qbCount.value = "1";
-  rbCount.value = "2";
-  wrCount.value = "2";
-  teCount.value = "1";
-  flexCount.value = "1";
-  defenseFormat.value = "D/ST";
-  kickerIncluded.checked = true;
-}
-
 function buildLeagueContext() {
-  const defenseText = defenseFormat.value === "None"
-    ? "no defense slot"
-    : `${defenseFormat.value} defense`;
-  const kickerText = kickerIncluded.checked ? "includes kicker" : "no kicker";
-
   return [
-    "League format:",
-    `- Scoring: ${scoringFormat.value}`,
-    `- Starting lineup slots: ${qbCount.value} QB, ${rbCount.value} RB, ${wrCount.value} WR, ${teCount.value} TE, ${flexCount.value} FLEX, ${defenseText}, ${kickerText}`,
-    "- If this is a season-long request, recommend starters and explain bench decisions.",
-    "- If this is a DFS request, prioritize the user's salary cap and player pool over the season-long roster settings.",
+    "Instructions:",
+    "- Use the user's prompt to determine sport, platform, roster slots, salary cap, scoring format, and any player constraints.",
+    "- If the prompt mentions a known DFS platform, apply its roster rules.",
+    "- If the user includes roster details, follow them exactly.",
+    "- Prioritize lineup balance, salary efficiency, matchup leverage, and upside/floor tradeoffs.",
+    "- Do not write introductions or conclusions. Start directly with the lineup recommendation.",
   ].join("\n");
 }
 

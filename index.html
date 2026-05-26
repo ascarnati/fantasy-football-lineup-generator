@@ -3,18 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fantasy Football Lineup Generator</title>
+    <title>Lineup Lab</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="app-shell">
       <header class="app-header">
-        <div>
-          <p class="eyebrow">AI lineup assistant</p>
-          <h1>Fantasy Football Lineup Generator</h1>
-          <p class="subtitle">
-            Build salary-aware DFS and season-long lineup ideas with clear roster logic.
-          </p>
+        <div class="brand-bar">
+          <img class="brand-logo" src="./images/the-line-up-lab.png" alt="Lineup Lab logo" />
+          <div>
+            <p class="eyebrow">AI lineup lab</p>
+            <h1>Lineup Lab</h1>
+            <p class="subtitle">
+              Generate DFS and season-long fantasy lineups for Football, Basketball, and Baseball with flexible platform guidance.
+            </p>
+          </div>
         </div>
         <div class="status-pill" id="api-status" aria-live="polite">
           <span class="status-dot"></span>
@@ -33,74 +36,30 @@
           </div>
 
           <div class="quick-prompts" aria-label="Prompt templates">
-            <button type="button" class="template-chip" data-template="Build a balanced DFS lineup under a $50,000 salary cap for QB, RB, RB, WR, WR, WR, TE, FLEX, and DEF. Prioritize floor, projected volume, and matchup quality.">
-              Balanced DFS
+            <button type="button" class="template-chip" data-sport="football" data-template="Build a balanced fantasy NFL lineup under a $50,000 salary cap for QB, RB, RB, WR, WR, WR, TE, FLEX, and D/ST. Prioritize floor, projected volume, and matchup quality, and include which platform you are drafting on.">
+              Fantasy Football DFS
             </button>
-            <button type="button" class="template-chip" data-template="Build a high-upside tournament lineup under a $50,000 salary cap. Include one QB stack and explain the leverage points.">
-              High-Upside DFS
+            <button type="button" class="template-chip" data-sport="basketball" data-template="Build a fantasy NBA lineup under a $60,000 salary cap with PG, SG, SF, PF, C, G, F, and UTIL. Prioritize salary balance, usage, and game stacks, and include which platform you are drafting on.">
+              Fantasy Basketball DFS
+            </button>
+            <button type="button" class="template-chip" data-sport="baseball" data-template="Build a fantasy MLB lineup under a $35,000 salary cap with C, 1B, 2B, 3B, SS, OF, U, and P. Focus on pitcher leverage and lineup diversification, and include which platform you are drafting on.">
+              Fantasy Baseball DFS
             </button>
             <button type="button" class="template-chip" data-mode="season" data-template="Set my best weekly starting lineup from the players below. Consider matchup, floor, ceiling, injury risk, bye weeks, and game script. My roster options are: ">
-              Weekly starters
+              Weekly Starters
             </button>
             <button type="button" class="template-chip" data-template="Help me choose between my flex options. Compare ceiling, floor, injury risk, matchup, and game script. Players: ">
-              Flex decision
+              Flex Decision
             </button>
           </div>
 
           <form id="lineup-form" class="lineup-form">
-            <fieldset class="format-panel">
-              <legend>League format</legend>
-              <div class="format-grid">
-                <label>
-                  Scoring
-                  <select id="scoring-format">
-                    <option>PPR</option>
-                    <option>Half PPR</option>
-                    <option>Standard</option>
-                    <option>Custom</option>
-                  </select>
-                </label>
-                <label>
-                  QB
-                  <input id="qb-count" type="number" min="0" max="3" value="1" />
-                </label>
-                <label>
-                  RB
-                  <input id="rb-count" type="number" min="0" max="5" value="2" />
-                </label>
-                <label>
-                  WR
-                  <input id="wr-count" type="number" min="0" max="6" value="2" />
-                </label>
-                <label>
-                  TE
-                  <input id="te-count" type="number" min="0" max="3" value="1" />
-                </label>
-                <label>
-                  FLEX
-                  <input id="flex-count" type="number" min="0" max="4" value="1" />
-                </label>
-                <label>
-                  Defense
-                  <select id="defense-format">
-                    <option>D/ST</option>
-                    <option>None</option>
-                    <option>IDP</option>
-                  </select>
-                </label>
-                <label class="checkbox-label">
-                  <input id="kicker-included" type="checkbox" checked />
-                  Kicker
-                </label>
-              </div>
-            </fieldset>
-
             <label for="user-input">What do you want to optimize?</label>
             <div class="input-wrapper">
               <textarea
                 id="user-input"
                 maxlength="1800"
-                placeholder="Tell me your goal, player pool, and constraints. Example: Set my best weekly starters from Josh Allen, Bijan Robinson, Jahmyr Gibbs, Puka Nacua, Amon-Ra St. Brown, Sam LaPorta, Brandon Aiyuk, and Jets D/ST. Note injuries, bye weeks, must-start players, players to avoid, salary cap, or scoring quirks."
+                placeholder="Tell me your goal, player pool, platform, and constraints. Example: Set my best fantasy NBA lineup with Luka Dončić, Jayson Tatum, and Nikola Jokic under $60,000. Note injuries, game stacks, players to avoid, and which platform you are drafting on."
               ></textarea>
             </div>
             <div class="form-footer">
