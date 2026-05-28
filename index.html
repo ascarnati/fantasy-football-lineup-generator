@@ -15,7 +15,7 @@
             <p class="eyebrow">AI lineup lab</p>
             <h1>Lineup Lab</h1>
             <p class="subtitle">
-              Generate DFS and season-long fantasy lineups for Football, Basketball, and Baseball with flexible platform guidance.
+              Build DFS and season-long lineups with sportsbook-style clarity. Lock your sport, platform, and constraints, then generate recommendations in seconds.
             </p>
           </div>
         </div>
@@ -54,6 +54,38 @@
           </div>
 
           <form id="lineup-form" class="lineup-form">
+            <div class="lineup-meta" role="group" aria-label="Lineup preferences">
+              <label>
+                Sport
+                <select id="sport-select" name="sport">
+                  <option value="">Auto-detect</option>
+                  <option value="football">Football</option>
+                  <option value="basketball">Basketball</option>
+                  <option value="baseball">Baseball</option>
+                </select>
+              </label>
+              <label>
+                Platform
+                <select id="platform-select" name="platform">
+                  <option value="">Auto-detect</option>
+                  <option value="fanduel">FanDuel</option>
+                  <option value="draftkings">DraftKings</option>
+                  <option value="yahoo">Yahoo</option>
+                  <option value="espn">ESPN</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="request-readiness" aria-live="polite">
+              <p class="readiness-title">Lineup slip checklist</p>
+              <ul class="readiness-list">
+                <li id="check-platform">Add a platform (FanDuel, DraftKings, etc.)</li>
+                <li id="check-budget">Include salary cap or scoring context</li>
+                <li id="check-positions">Define roster slots or lineup type</li>
+                <li id="check-constraints">Set locks, fades, or injury notes</li>
+              </ul>
+            </div>
+
             <label for="user-input">What do you want to optimize?</label>
             <div class="input-wrapper">
               <textarea

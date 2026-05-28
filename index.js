@@ -11,6 +11,12 @@ const clearButton = document.getElementById("clear-button");
 const copyButton = document.getElementById("copy-button");
 const charCount = document.getElementById("char-count");
 const templateButtons = document.querySelectorAll(".template-chip");
+const sportSelect = document.getElementById("sport-select");
+const platformSelect = document.getElementById("platform-select");
+const checklistPlatform = document.getElementById("check-platform");
+const checklistBudget = document.getElementById("check-budget");
+const checklistPositions = document.getElementById("check-positions");
+const checklistConstraints = document.getElementById("check-constraints");
 
 let lastLineupText = "";
 
@@ -30,12 +36,15 @@ function start() {
   lineupForm.addEventListener("submit", handleLineupRequest);
   clearButton.addEventListener("click", clearRequest);
   copyButton.addEventListener("click", copyLineup);
+  sportSelect.addEventListener("change", syncInputState);
+  platformSelect.addEventListener("change", syncInputState);
 
   templateButtons.forEach((button) => {
     button.addEventListener("click", () => {
       userInput.value = button.dataset.template || "";
       const sport = button.dataset.sport;
       userInput.placeholder = sportPlaceholders[sport] || sportPlaceholders.default;
+      sportSelect.value = sport || "";
       userInput.focus();
       syncInputState();
     });
@@ -47,32 +56,89 @@ function start() {
 }
 
 function syncInputState() {
-  const length = userInput.value.length;
-  const hasInput = userInput.value.trim().length > 0;
+  const rawInput = userInput.value;
+  const trimmedInput = rawInput.trim();
+  const length = rawInput.length;
+  const hasInput = trimmedInput.length > 0;
+  const selectedPlatform = platformSelect.value;
+  const selectedSport = sportSelect.value;
 
   charCount.textContent = `${length} / ${userInput.maxLength}`;
   generateButton.disabled = !hasInput;
   autoResizeTextarea(userInput);
+  updateReadinessChecklist({
+    text: trimmedInput.toLowerCase(),
+    selectedPlatform,
+    selectedSport,
+  });
 }
 
 function clearRequest() {
   userInput.value = "";
   lastLineupText = "";
   copyButton.disabled = true;
+  sportSelect.value = "";
+  platformSelect.value = "";
   userInput.placeholder = sportPlaceholders.default;
   syncInputState();
   renderEmptyState();
   userInput.focus();
 }
 
-function buildLeagueContext() {
-  return [
+function buildLeagueContext({ selectedSport, selectedPlatform }) {
+  const contextLines = [
     "Instructions:",
     "- Use the user's prompt to determine sport, platform, roster slots, salary cap, scoring format, and any player constraints.",
     "- If the prompt mentions a known DFS platform, apply its roster rules.",
     "- If the user includes roster details, follow them exactly.",
     "- Prioritize lineup balance, salary efficiency, matchup leverage, and upside/floor tradeoffs.",
     "- Do not write introductions or conclusions. Start directly with the lineup recommendation.",
+  ];
+
+  if (selectedSport) {
+    contextLines.push(`- Preferred sport: ${selectedSport}.`);
+  }
+
+  if (selectedPlatform) {
+    contextLines.push(`- Preferred platform: ${selectedPlatform}.`);
+  }
+
+  return contextLines.join("\n");
+}
+
+function updateReadinessChecklist({ text, selectedPlatform, selectedSport }) {
+  const hasPlatform =
+    Boolean(selectedPlatform) || /\b(fanduel|draftkings|yahoo|espn|sleeper)\b/.test(text);
+  const hasBudgetContext = /\$?\d{2,3}(,\d{3})?|\bsalary\b|\bcap\b|\bscoring\b/.test(text);
+  const hasLineupStructure =
+    Boolean(selectedSport) ||
+    /\b(qb|rb|wr|te|dst|d\/st|flex|pg|sg|sf|pf|c|util|1b|2b|3b|ss|of|sp|rp)\b/.test(text);
+  const hasConstraints = /\b(lock|must|avoid|fade|injury|questionable|out|stack|limit)\b/.test(text);
+
+  checklistPlatform.classList.toggle("is-complete", hasPlatform);
+  checklistBudget.classList.toggle("is-complete", hasBudgetContext);
+  checklistPositions.classList.toggle("is-complete", hasLineupStructure);
+  checklistConstraints.classList.toggle("is-complete", hasConstraints);
+}
+
+function buildUserRequestContext(requestDetails, selectedSport, selectedPlatform) {
+  const context = [];
+
+  if (selectedSport) {
+    context.push(`Sport: ${selectedSport}`);
+  }
+
+  if (selectedPlatform) {
+    context.push(`Platform: ${selectedPlatform}`);
+  }
+
+  if (context.length === 0) {
+    return requestDetails;
+  }
+
+  return [
+    `User-selected context: ${context.join(" | ")}`,
+    requestDetails,
   ].join("\n");
 }
 
@@ -99,8 +165,11 @@ async function handleLineupRequest(e) {
 
   const requestDetails = userInput.value.trim();
   if (!requestDetails) return;
+  const selectedSport = sportSelect.value;
+  const selectedPlatform = platformSelect.value;
+  const requestWithContext = buildUserRequestContext(requestDetails, selectedSport, selectedPlatform);
 
-  const userPrompt = `${buildLeagueContext()}\n\nUser request:\n${requestDetails}`;
+  const userPrompt = `${buildLeagueContext({ selectedSport, selectedPlatform })}\n\nUser request:\n${requestWithContext}`;
 
   setLoading(true);
   copyButton.disabled = true;
@@ -112,11 +181,18 @@ async function handleLineupRequest(e) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userPrompt }),
     });
-
-    const data = await response.json();
+    const responseText = await response.text();
+    let data = {};
+    if (responseText) {
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        throw new Error("The lineup service returned an invalid response. Please try again.");
+      }
+    }
 
     if (!response.ok) {
-      throw new Error(data.message || "Something went wrong.");
+      throw new Error(data.message || `Lineup request failed (${response.status}).`);
     }
 
     lastLineupText = data.lineup;
